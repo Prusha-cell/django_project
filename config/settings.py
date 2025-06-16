@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'my_first_app',
     'library',
     'users',
-    'Task_Manager'
+    'Task_Manager',
 ]
 
 MIDDLEWARE = [
