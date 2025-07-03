@@ -42,12 +42,6 @@ def task_detail(request, pk):
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# # Вычисление общего количества задач
-# def get_count_tasks(requests):
-#     aggregates = Task.objects.aggregate(total_tasks=Count('id'))
-#     print(f"Общее количество задач: {aggregates['total_tasks']}")
-
-
 # статистика задач
 def display_statistic_tasks(requests):
     now = timezone.now()
