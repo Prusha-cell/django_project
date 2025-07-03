@@ -1,6 +1,8 @@
 # from django.contrib.auth import aget_user
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Avg, Count
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 
@@ -52,12 +54,16 @@ class Book(models.Model):
                                  related_name='books')
     libraries = models.ManyToManyField("Library", related_name='books', verbose_name="Library")
 
+
+
     @property
     def rating(self):
         return self.reviews.all().aggregate(models.Avg('rating'))['rating__avg']
 
     def __str__(self):
         return f'{self.title}'
+
+
 
 
 # class Publisher(models.Model):

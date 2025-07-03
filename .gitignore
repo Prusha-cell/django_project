@@ -13,3 +13,6 @@ __pycache__/
 # VS Code / PyCharm
 .idea/
 *.code-workspace
+
+store_data.py
+read_code.txt

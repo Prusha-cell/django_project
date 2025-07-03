@@ -58,3 +58,80 @@ class SubTask(models.Model):
         verbose_name = 'SubTask'
         constraints = [models.UniqueConstraint(fields=['title'], name='uniq_title_subtask')]
 
+
+
+
+####################### HOMEWORK_10 ####################################
+
+# # Создание записей:
+# # Task:
+# # title: "Prepare presentation".
+# # description: "Prepare materials and slides for the presentation".
+# # status: "New".
+# # deadline: Today's date + 3 days.
+#
+# new_task = Task.objects.create(title="Prepare presentation",
+#                                description="Prepare materials and slides for the presentation",
+#                                status="new",
+#                                deadline=timezone.now() + timedelta(days=3))
+#
+# # SubTasks для "Prepare presentation":
+# # title: "Gather information".
+# # description: "Find necessary information for the presentation".
+# # status: "New".
+# # deadline: Today's date + 2 days.
+# # title: "Create slides".
+# # description: "Create presentation slides".
+# # status: "New".
+# # deadline: Today's date + 1 day.
+#
+# new_subtask = SubTask.objects.create(
+#     task=new_task,
+#     title="Gather information",
+#     description="Find necessary information for the presentation",
+#     status="new",
+#     deadline=timezone.now() + timedelta(days=2)
+# )
+#
+# new_subtask_2 = SubTask.objects.create(
+#     task=new_task,
+#     title="Create slides",
+#     description="Create presentation slides",
+#     status="new",
+#     deadline=timezone.now() + timedelta(days=1)
+# )
+#
+#
+#
+# # Tasks со статусом "New":
+# # Вывести все задачи, у которых статус "New".
+#
+# tasks_new = Task.objects.filter(status='new')
+# for task in tasks_new:
+#     print(task)
+#
+#
+# # SubTasks с просроченным статусом "Done":
+# # Вывести все подзадачи, у которых статус "Done", но срок выполнения истек
+#
+# from django.db.models import Q
+# done = SubTask.objects.filter(Q(status='done') & Q(deadline__lt=timezone.now()))
+#
+# # # Измените статус "Prepare presentation" на "In progress".
+# new_task.status = 'in_progress'
+# new_task.save()
+#
+# # Измените срок выполнения для "Gather information" на два дня назад.
+# subtask = SubTask.objects.get(title="Gather information")
+# subtask.deadline = timezone.now() - timedelta(days=2)
+# subtask.save()
+#
+#
+# # Измените описание для "Create slides" на "Create and format presentation slides".
+# subtask_2 = SubTask.objects.get(title="Create slides")
+# subtask_2.title = 'Create and format presentation slides'
+# subtask_2.save()
+#
+#
+# # Удалите задачу "Prepare presentation" и все ее подзадачи.
+# Task.objects.filter(title="Prepare presentation").delete()
