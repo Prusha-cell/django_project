@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Task
+from .models import Task, SubTask
 
 
 # создание новой задачи
@@ -21,3 +21,11 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'  # Включает все поля модели
+
+
+# создание одной подзадачи
+class SubTaskCreateSerializer(serializers.ModelSerializer):
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = SubTask
