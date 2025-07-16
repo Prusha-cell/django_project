@@ -16,8 +16,16 @@ class TaskListSerializer(serializers.ModelSerializer):
         fields = ['title', 'description', 'status', 'deadline']
 
 
-# вывод одной конкретной задачи
+class SubTaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SubTask
+        fields = '__all__'
+
+
+# вывод одной конкретной задачи с подзадачами
 class TaskDetailSerializer(serializers.ModelSerializer):
+    subtasks = SubTaskSerializer(many=True, read_only=True)  # Вложенный сериализатор
+
     class Meta:
         model = Task
         fields = '__all__'  # Включает все поля модели
@@ -32,6 +40,7 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# создание и обновление категории
 class CategoryCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
