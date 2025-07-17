@@ -30,7 +30,7 @@ class Product(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name='products')
     price = models.DecimalField(max_digits=10, decimal_places=2)
     # Количество доступного продукта:
-    available_quantity = models.PositiveIntegerField()
+    quantity = models.PositiveIntegerField(default=0)
     article = models.CharField(max_length=100, unique=True, help_text="Unique string product id", db_index=True)
     available = models.BooleanField(default=True)
 

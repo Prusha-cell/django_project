@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status
@@ -28,10 +29,39 @@ def task_create(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# вывод всех задач
+#вывод всех задач, а так же по дням недели
 @api_view(['GET'])
 def task_list(request):
-    tasks = Task.objects.all()
+    weekday_param = request.query_params.get('weekday', None)
+
+    if weekday_param:
+        # Преобразуем входной день недели в нижний регистр
+        weekday_param = weekday_param.lower()
+
+        # Словарь соответствий: день недели -> номер (0 - понедельник, 6 - воскресенье)
+        weekdays_map = {
+            'понедельник': 0,
+            'вторник': 1,
+            'среда': 2,
+            'четверг': 3,
+            'пятница': 4,
+            'суббота': 5,
+            'воскресенье': 6
+        }
+
+        if weekday_param not in weekdays_map:
+            return Response({'error': 'Некорректный день недели. Используйте: понедельник, вторник, ...'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        weekday_number = weekdays_map[weekday_param]
+        tasks = Task.objects.all()
+
+        # Фильтруем по дню недели из поля deadline
+        tasks = [task for task in tasks if task.deadline.weekday() == weekday_number]
+    else:
+        # Если параметр не передан — показать все задачи
+        tasks = Task.objects.all()
+
     serializer = TaskListSerializer(tasks, many=True)
     return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -64,25 +94,40 @@ def display_statistic_tasks(requests):
 
 
 class SubTaskListCreateView(APIView):
+    class CustomPagination(PageNumberPagination):
+        page_size = 5
+        page_size_query_param = 'page_size'
+        max_page_size = 20
 
-    def get_objects(self):
-        return SubTask.objects.all()
+    def get_queryset(self, request):
+        queryset = SubTask.objects.all().order_by('-created_at')
+
+        # Получаем фильтры из параметров запроса
+        task_title = request.query_params.get('task_title')
+        status_param = request.query_params.get('status')
+
+        if task_title:
+            # Фильтрация по названию задачи через связь task__title
+            queryset = queryset.filter(task__title__icontains=task_title)
+
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+
+        return queryset
 
     def get(self, request: Request) -> Response:
-        sub_tasks = self.get_objects()
-        if sub_tasks.exists():
-            serializer = SubTaskSerializer(sub_tasks, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(data=[], status=status.HTTP_204_NO_CONTENT)
+        queryset = self.get_queryset(request)
+        paginator = self.CustomPagination()
+        page = paginator.paginate_queryset(queryset, request)
+
+        serializer = SubTaskSerializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
 
     def post(self, request):
         serializer = SubTaskSerializer(data=request.data)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
