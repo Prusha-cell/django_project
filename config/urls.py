@@ -22,4 +22,5 @@ urlpatterns = [
     path('my_first_app/', include('my_first_app.urls')),
     path('project/', include('project.urls')),
     path('Task_Manager/', include('Task_Manager.urls')),
+    path('library/', include('library.urls')),
 ]

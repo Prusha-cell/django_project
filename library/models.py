@@ -1,10 +1,9 @@
-# from django.contrib.auth import aget_user
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Avg, Count
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
+
+from library.managers import SoftDeleteManager
 
 
 class Author(models.Model):
@@ -30,47 +29,71 @@ class Author(models.Model):
         return f'{self.first_name} {self.last_name}'
 
 
-genre_choice = {
-    'Fiction': 'Fiction',
-    'Non Fiction': 'Non-Fiction',
-    'Sci-Fy': 'Science Fiction',
-    'Fantasy': 'Fantasy',
-    'Mystery': 'Mystery',
-    'Biography': 'Biography',
-    'Default': 'not_set'
-}
+genre_choice = [
+    ('Fiction', 'Fiction'),
+    ('Non Fiction', 'Non-Fiction'),
+    ('Sci-Fy', 'Science Fiction'),
+    ('Fantasy', 'Fantasy'),
+    ('Mystery', 'Mystery'),
+    ('Biography', 'Biography'),
+    ('Default', 'not_set')
+]
 
 
+# creating a model Publisher
+class Publisher(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(null=True, blank=True, default='publisher')
+    established_date = models.DateField()
+
+    def __str__(self):
+        return self.name
+
+
+class Genre(models.Model):
+    name = models.CharField(max_length=100, unique=True, blank=True, verbose_name="Genre", choices=genre_choice)
+
+    def __str__(self):
+        return self.name
+
+
+# creating a model Book
 class Book(models.Model):
     title = models.CharField(max_length=100, verbose_name="Book Title", blank=False)
     author = models.ForeignKey(Author, on_delete=models.SET_NULL, verbose_name="Author", null=True)
     publication_date = models.DateField(null=True, blank=False, verbose_name="Publication Date")
     description = models.TextField(null=True, blank=True, verbose_name="Summary")
-    Genre = models.CharField(max_length=100, null=True, blank=True, verbose_name="Genre", choices=genre_choice)
+    genres = models.ManyToManyField(Genre, related_name='books')
     amount_pages = models.PositiveIntegerField(null=True, blank=True, verbose_name="Amount of Pages",
                                                validators=[MaxValueValidator(10_000)])
-    publisher = models.ForeignKey("Member", on_delete=models.SET_NULL, verbose_name="Publisher", null=True)
+    publisher = models.ForeignKey(Publisher, on_delete=models.CASCADE, verbose_name="Publisher", null=True, blank=True)
+    created_at = models.DateTimeField(null=True, blank=True, verbose_name="Created at")
     category = models.ForeignKey('Category', on_delete=models.SET_NULL, verbose_name="Category", null=True,
                                  related_name='books')
     libraries = models.ManyToManyField("Library", related_name='books', verbose_name="Library")
-
-
+    price = models.PositiveIntegerField(null=True, blank=True, verbose_name="Price")
+    is_banned = models.BooleanField(default=False, verbose_name="Is Banned")
+    is_deleted = models.BooleanField(default=False)  # Поле для мягкого удаления
 
     @property
     def rating(self):
         return self.reviews.all().aggregate(models.Avg('rating'))['rating__avg']
 
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    def delete(self, *args, **kwargs):
+        """Переопределяем стандартный метод удаления."""
+        self.is_deleted = True  # Устанавливаем флаг
+        self.save()  # Сохраняем изменения
+
+    def restore(self):
+        """Метод для восстановления записи."""
+        self.is_deleted = False
+        self.save()
+
     def __str__(self):
         return f'{self.title}'
-
-
-
-
-# class Publisher(models.Model):
-#     name = models.CharField(max_length=100)
-#     adress = models.CharField(max_length=255, null=True, blank=True)
-#     city = models.CharField(max_length=100, null=True, blank=True)
-#     country = models.CharField(max_length=100)
 
 
 class Category(models.Model):
@@ -198,3 +221,59 @@ class EventParticipant(models.Model):
 
     def __str__(self):
         return f'{self.event.name}. Member: {self.member.first_name} {self.member.last_name} registered on {self.register_date}'
+
+
+# creating a list of countries
+countries = [
+    ('DE', 'Germany'),
+    ('UK', 'United Kingdom'),
+    ('US', 'United States'),
+    ('PT', 'Portugal'),
+    ('FR', 'France'),
+    ('ES', 'Spain'),
+    ('IT', 'Italy'),
+]
+
+
+# creating a model User
+class User(models.Model):
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=70, verbose_name='Family name', null=True, blank=True)
+    age = models.IntegerField(validators=[MinValueValidator(18), MaxValueValidator(120)])
+    rating = models.FloatField(default=0.0)
+    country = models.CharField(choices=countries, default='DE', verbose_name="Country")
+
+
+# creating a model UserInfo
+class UserInfo(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="Info")
+    married = models.BooleanField(verbose_name="Married?")
+
+
+# creating a model Actor
+class Actor(models.Model):
+    name = models.CharField(max_length=50)
+
+    def __str__(self):
+        return f'{self.name}'
+
+
+# creating a model Director
+class Director(models.Model):
+    name = models.CharField(max_length=255)
+    experience = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f'{self.name}'
+
+
+# creating a model Movie
+class Movie(models.Model):
+    title = models.CharField(max_length=50)
+    actors = models.ManyToManyField(Actor, related_name='movies')
+    director = models.ForeignKey(Director, on_delete=models.SET_NULL, related_name='movies', null=True, blank=True)
+
+    def __str__(self):
+        if self.director:
+            return f'Title: "{self.title}" | Director: {self.director.name}'
+        return f'{self.title}'

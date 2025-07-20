@@ -51,7 +51,8 @@ INSTALLED_APPS = [
     'users',
     'Task_Manager',
     'project',
-    'shop'
+    'shop',
+    'django_filters'
 ]
 
 MIDDLEWARE = [

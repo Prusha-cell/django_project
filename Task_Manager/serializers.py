@@ -3,6 +3,13 @@ from .models import Task, SubTask, Category
 from django.utils import timezone
 
 
+# вывод всех задач
+class TaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Task
+        fields = '__all__'
+
+
 # создание новой задачи
 class TaskCreateSerializer(serializers.ModelSerializer):
     class Meta:
