@@ -143,9 +143,6 @@ class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         return context
 
 
-
-
-
 # статистика задач
 def display_statistic_tasks(requests):
     now = timezone.now()
@@ -161,69 +158,99 @@ def display_statistic_tasks(requests):
     }, status=status.HTTP_200_OK)
 
 
-class SubTaskListCreateView(APIView):
-    class CustomPagination(PageNumberPagination):
-        page_size = 5
-        page_size_query_param = 'page_size'
-        max_page_size = 20
+# class SubTaskListCreateView(APIView):
+#     class CustomPagination(PageNumberPagination):
+#         page_size = 5
+#         page_size_query_param = 'page_size'
+#         max_page_size = 20
+#
+#     def get_queryset(self, request):
+#         # сортируем по убыванию
+#         queryset = SubTask.objects.all().order_by('-created_at')
+#
+#         # Получаем фильтры из параметров запроса
+#         task_title = request.query_params.get('task_title')
+#         status_param = request.query_params.get('status')
+#
+#         if task_title:
+#             # Фильтрация по названию задачи через связь task__title
+#             queryset = queryset.filter(task__title__icontains=task_title)
+#
+#         if status_param:
+#             queryset = queryset.filter(status=status_param)
+#
+#         return queryset
+#
+#     def get(self, request: Request) -> Response:
+#         queryset = self.get_queryset(request)
+#         paginator = self.CustomPagination()
+#         page = paginator.paginate_queryset(queryset, request)
+#
+#         serializer = SubTaskSerializer(page, many=True)
+#         return paginator.get_paginated_response(serializer.data)
+#
+#     def post(self, request):
+#         serializer = SubTaskSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         else:
+#             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#
+# class SubTaskDetailUpdateDeleteView(APIView):
+#
+#     def get_object(self, pk: int) -> SubTask:
+#         return get_object_or_404(SubTask, pk=pk)
+#
+#     def get(self, request: Request, pk: int) -> Response:
+#         sub_task = self.get_object(pk=pk)
+#
+#         serializer = SubTaskSerializer(sub_task)
+#         return Response(serializer.data, status=status.HTTP_200_OK)
+#
+#     def put(self, request: Request, pk: int) -> Response:
+#         sub_task = self.get_object(pk=pk)
+#         serializer = SubTaskSerializer(sub_task, data=request.data)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             return Response(serializer.validated_data, status=status.HTTP_200_OK)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#     def delete(self, request: Request, pk: int) -> Response:
+#         sub_task = self.get_object(pk=pk)
+#         sub_task.delete()
+#         return Response(
+#             data={"message": "Subtask was deleted successfully"},
+#             status=status.HTTP_200_OK
+#         )
 
-    def get_queryset(self, request):
-        # сортируем по убыванию
-        queryset = SubTask.objects.all().order_by('-created_at')
 
-        # Получаем фильтры из параметров запроса
-        task_title = request.query_params.get('task_title')
-        status_param = request.query_params.get('status')
+####################### Generic Views for SubTask ###########################################
 
-        if task_title:
-            # Фильтрация по названию задачи через связь task__title
-            queryset = queryset.filter(task__title__icontains=task_title)
-
-        if status_param:
-            queryset = queryset.filter(status=status_param)
-
-        return queryset
-
-    def get(self, request: Request) -> Response:
-        queryset = self.get_queryset(request)
-        paginator = self.CustomPagination()
-        page = paginator.paginate_queryset(queryset, request)
-
-        serializer = SubTaskSerializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
-
-    def post(self, request):
-        serializer = SubTaskSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class CustomPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 20
 
 
-class SubTaskDetailUpdateDeleteView(APIView):
+class SubTaskListCreateView(ListCreateAPIView):
+    serializer_class = SubTaskSerializer
+    pagination_class = CustomPagination
 
-    def get_object(self, pk: int) -> SubTask:
-        return get_object_or_404(SubTask, pk=pk)
+    # Подключаем бэкенды для фильтрации, поиска и сортировки
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
 
-    def get(self, request: Request, pk: int) -> Response:
-        sub_task = self.get_object(pk=pk)
+    # Поля, по которым можно будет точно фильтровать
+    filterset_fields = ['status', 'deadline']
 
-        serializer = SubTaskSerializer(sub_task)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # Поля, по которым будет работать полнотекстовый поиск (search=...)
+    search_fields = ['title', 'description']
 
-    def put(self, request: Request, pk: int) -> Response:
-        sub_task = self.get_object(pk=pk)
-        serializer = SubTaskSerializer(sub_task, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-            return Response(serializer.validated_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # Поля, по которым можно будет сортировать (ordering=...)
+    ordering_fields = ['created_at']
 
-    def delete(self, request: Request, pk: int) -> Response:
-        sub_task = self.get_object(pk=pk)
-        sub_task.delete()
-        return Response(
-            data={"message": "Subtask was deleted successfully"},
-            status=status.HTTP_200_OK
-        )
+
+class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
+    queryset = SubTask.objects.all()
+    serializer_class = SubTaskSerializer
