@@ -235,8 +235,9 @@ class CustomPagination(PageNumberPagination):
 
 
 class SubTaskListCreateView(ListCreateAPIView):
-    serializer_class = SubTaskSerializer
     pagination_class = CustomPagination
+    serializer_class = SubTaskSerializer
+    queryset = SubTask.objects.all()
 
     # Подключаем бэкенды для фильтрации, поиска и сортировки
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -249,7 +250,6 @@ class SubTaskListCreateView(ListCreateAPIView):
 
     # Поля, по которым можно будет сортировать (ordering=...)
     ordering_fields = ['created_at']
-
 
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
