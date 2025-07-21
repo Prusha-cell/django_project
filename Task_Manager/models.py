@@ -1,4 +1,7 @@
 from django.db import models
+from django.utils import timezone
+
+from Task_Manager.managers import SoftDeleteManager
 
 # Статусы задачи
 STATUS_CHOICES = [
@@ -12,6 +15,23 @@ STATUS_CHOICES = [
 
 class Category(models.Model):
     name = models.CharField(max_length=100, verbose_name="Category name")
+    is_deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True)
+
+    objects = SoftDeleteManager()
+    all_objects = models.Manager()
+
+    def delete(self, *args, **kwargs):
+        """Переопределяем стандартный метод удаления."""
+        self.is_deleted = True  # Устанавливаем флаг
+        self.deleted_at = timezone.now()
+        self.save()  # Сохраняем изменения
+
+    def restore(self):
+        """Метод для восстановления записи."""
+        self.is_deleted = False
+        self.deleted_at = None
+        self.save()
 
     def __str__(self):
         return self.name
