@@ -1,4 +1,6 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+
 from .views import (TaskListCreateView,
                     TaskDetailUpdateDeleteView,
                     SubTaskListCreateView,
@@ -6,8 +8,15 @@ from .views import (TaskListCreateView,
                    # task_create,
                    # task_list,
                    # task_detail,
-                   display_statistic_tasks, )
+                   display_statistic_tasks,
+                    CategoryViewSet)
 # from Task_Manager.views import SubTaskListCreateView, SubTaskDetailUpdateDeleteView
+
+router = DefaultRouter()
+
+router.register('categories', CategoryViewSet)
+
+
 
 urlpatterns = [
     # path('tasks/create/', task_create, name='task-create'),  # Маршрут для создания новой задачи
@@ -21,5 +30,6 @@ urlpatterns = [
     path('tasks/', TaskListCreateView.as_view(), name='task-list-create'),
     path('tasks/<int:pk>/', TaskDetailUpdateDeleteView.as_view(), name='task-detail-update-delete'),
     path('subtasks/', SubTaskListCreateView.as_view(), name='subtask-list-create'),
-    path('subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view(), name='subtasks-detail-update-delete')
+    path('subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view(), name='subtask-detail-update-delete'),
+    path('', include(router.urls)),
 ]

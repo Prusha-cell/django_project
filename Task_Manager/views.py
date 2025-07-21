@@ -1,18 +1,21 @@
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status, filters
+from rest_framework.viewsets import ModelViewSet
+
 from .serializers import (TaskSerializer,
                           TaskCreateSerializer,
                           TaskListSerializer,
                           TaskDetailSerializer,
-                          SubTaskSerializer)
-from .models import Task, SubTask
+                          SubTaskSerializer,
+                          CategorySerializer)
+from .models import Task, SubTask, Category
 from django.db.models import Count
 from django.utils import timezone
 from django.http import JsonResponse
@@ -251,6 +254,34 @@ class SubTaskListCreateView(ListCreateAPIView):
     # Поля, по которым можно будет сортировать (ordering=...)
     ordering_fields = ['created_at']
 
+
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskSerializer
+
+
+################### ModelViewSet for Category #####################################
+
+class CategoryViewSet(ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+    # кастомный метод для подсчета количества задач в каждой категории
+    @action(detail=False, methods=['get'])
+    def count_tasks(self, request):
+        """
+        Возвращает количество задач для каждой категории.
+        """
+        # С помощью annotate добавляем к каждой категории поле task_count
+        categories_with_task_counts = Category.objects.annotate(task_count=Count('tasks'))
+
+        # Формируем данные для ответа
+        data = [
+            {
+                "id": category.id,
+                "category": category.name,
+                "task_count": category.task_count
+            }
+            for category in categories_with_task_counts
+        ]
+        return Response(data)

@@ -53,6 +53,13 @@ class SubTaskCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+# Вывод всех категорий
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__'
+
+
 # создание и обновление категории
 class CategoryCreateSerializer(serializers.ModelSerializer):
     class Meta:
