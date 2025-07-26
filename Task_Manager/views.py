@@ -9,6 +9,7 @@ from rest_framework.request import Request
 from rest_framework import status, filters
 from rest_framework.viewsets import ModelViewSet
 
+from config.paginations import CustomCursorPagination
 from .serializers import (TaskSerializer,
                           TaskCreateSerializer,
                           TaskListSerializer,
@@ -87,6 +88,7 @@ from django.shortcuts import get_object_or_404
 
 ######### Generic Views #################################################################
 class TaskListCreateView(ListCreateAPIView):
+    pagination_class = CustomCursorPagination
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
 
@@ -231,14 +233,14 @@ def display_statistic_tasks(requests):
 
 ####################### Generic Views for SubTask ###########################################
 
-class CustomPagination(PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'page_size'
-    max_page_size = 20
+# class CustomPagination(PageNumberPagination):
+#     page_size = 5
+#     page_size_query_param = 'page_size'
+#     max_page_size = 20
 
 
 class SubTaskListCreateView(ListCreateAPIView):
-    pagination_class = CustomPagination
+    pagination_class = CustomCursorPagination
     serializer_class = SubTaskSerializer
     queryset = SubTask.objects.all()
 
@@ -263,6 +265,7 @@ class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
 ################### ModelViewSet for Category #####################################
 
 class CategoryViewSet(ModelViewSet):
+    pagination_class = CustomCursorPagination
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 

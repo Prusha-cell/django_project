@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+from datetime import timedelta
 from pathlib import Path
 import environ
 import os
@@ -52,7 +52,10 @@ INSTALLED_APPS = [
     'Task_Manager',
     'project',
     'shop',
-    'django_filters'
+    'django_filters',
+    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -63,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'shop.middleware.JWTAuthenticationMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -145,3 +149,41 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,  # Теперь по умолчанию на всех страницах будет 10 элементов
+#
+#     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+#     # 'PAGE_SIZE': 10,  # Здесь PAGE_SIZE работает как 'default_limit'
+#
+    # Указываем полный путь к нашему классу!
+    # 'DEFAULT_PAGINATION_CLASS': 'config.paginations.CustomCursorPagination',
+    # 'PAGE_SIZE': 5,
+#
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework_simplejwt.authentication.JWTAuthentication',
+#         # 'rest_framework.authentication.TokenAuthentication',
+#         # Если вы хотите использовать несколько методов, добавьте их здесь.
+#         # Например: 'rest_framework.authentication.SessionAuthentication',
+#         #           'rest_framework.authentication.BasicAuthentication',
+#     ],
+#
+#     'DEFAULT_PERMISSION_CLASSES': [
+#         'rest_framework.permissions.IsAuthenticated',
+#     ],
+# }
+#
+#
+# SIMPLE_JWT = {
+#     # Время жизни access токена (короткое)
+#     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+#     # Время жизни refresh токена (длинное)
+#     'REFRESH_TOKEN_LIFETIME': timedelta(days=10),
+#     # Включаем ротацию refresh токенов для повышения безопасности
+#     'ROTATE_REFRESH_TOKENS': True,
+#     # Добавляем старый refresh токен в черный список после его использования
+#     'BLACKLIST_AFTER_ROTATION': True,
+#     # Указываем тип заголовка авторизации
+#     'AUTH_HEADER_TYPES': ('Bearer',),
+}
