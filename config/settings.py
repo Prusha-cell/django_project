@@ -224,7 +224,7 @@ LOGGING = {
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,  # Теперь по умолчанию на всех страницах будет 10 элементов
+    'PAGE_SIZE': 5,  # Теперь по умолчанию на всех страницах будет 5 элементов
 
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'PAGE_SIZE': 10,  # Здесь PAGE_SIZE работает как 'default_limit'
@@ -250,7 +250,7 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     # Время жизни access токена (короткое)
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     # Время жизни refresh токена (длинное)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     # # Включаем ротацию refresh токенов для повышения безопасности
