@@ -118,6 +118,13 @@ class TaskListCreateView(ListCreateAPIView):
     # Поля, по которым можно будет сортировать (ordering=...)
     ordering_fields = ['created_at']
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # При сохранении объекта мы передаем дополнительный параметр owner,
+        # в который записываем текущего пользователя из запроса.
+        serializer.save(owner=self.request.user)
+
     # Переопределяем метод create
     # def create(self, request, *args, **kwargs):
     #     # Копируем данные из запроса, чтобы их можно было изменять
@@ -269,6 +276,13 @@ class SubTaskListCreateView(ListCreateAPIView):
 
     # Поля, по которым можно будет сортировать (ordering=...)
     ordering_fields = ['created_at']
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # При сохранении объекта мы передаем дополнительный параметр owner,
+        # в который записываем текущего пользователя из запроса.
+        serializer.save(owner=self.request.user)
 
 
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):

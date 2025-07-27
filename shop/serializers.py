@@ -1,14 +1,19 @@
+import re
+
+from django.contrib.auth.models import User
 from rest_framework import serializers
 from .models import *
 
 
 class CategorySerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Category
         fields = '__all__'
 
 
 class SupplierSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Supplier
         fields = '__all__'
@@ -24,6 +29,7 @@ class ProductSerializer(serializers.ModelSerializer):
 
 
 class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Product
         fields = ['name', 'category', 'supplier', 'price', 'quantity', 'article', 'available']
@@ -38,12 +44,14 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
 
 class ProductDetailCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = ProductDetail
         fields = ['product', 'description', 'manufacturing_date', 'expiration_date', 'weight']
 
 
 class AddressSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Address
         fields = ['country', 'city', 'street', 'house']
@@ -59,6 +67,7 @@ class CustomerSerializer(serializers.ModelSerializer):
 
 
 class CustomerCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Customer
         fields = ['first_name', 'last_name', 'email', 'phone_number', 'address', 'date_joined', 'deleted', 'deleted_at']
@@ -86,6 +95,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Order
         fields = ['customer', 'order_date']
@@ -102,12 +112,32 @@ class OrderItemSerializer(serializers.ModelSerializer):
 
 
 class OrderItemCreateUpdateSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = OrderItem
         fields = ['order', 'product', 'quantity', 'price']
+
 
     def validate_quantity(self, value):
         if value > 1000:
             raise serializers.ValidationError('Quantity must be less than 1000')
 
         return value
+
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    # Делаем поле пароля только для записи (его нельзя будет прочитать из API)
+    password = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
+
+    class Meta:
+        model = User
+        fields = ['username', 'password', 'email']
+
+    def create(self, validated_data):
+        # Используем create_user, чтобы пароль был правильно захеширован
+        user = User.objects.create_user(
+            username=validated_data['username'],
+            password=validated_data['password'],
+            email=validated_data.get('email', '')
+        )
+        return user

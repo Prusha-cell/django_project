@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -74,6 +75,7 @@ class Book(models.Model):
     price = models.PositiveIntegerField(null=True, blank=True, verbose_name="Price")
     is_banned = models.BooleanField(default=False, verbose_name="Is Banned")
     is_deleted = models.BooleanField(default=False)  # Поле для мягкого удаления
+    owner = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Owner", null=True, related_name='books')
 
     @property
     def rating(self):

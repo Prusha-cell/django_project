@@ -8,6 +8,7 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = '__all__'
+        read_only_fields = ['owner']
 
 
 # создание новой задачи
@@ -33,6 +34,7 @@ class SubTaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubTask
         fields = '__all__'
+        read_only_fields = ['owner']
 
 
 # вывод одной конкретной задачи с подзадачами

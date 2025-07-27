@@ -183,6 +183,13 @@ class BookListCreateView(ListCreateAPIView):
     # Поля, по которым можно будет сортировать (ordering=...)
     ordering_fields = ['publication_date', 'price']
 
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        # При сохранении объекта мы передаем дополнительный параметр owner,
+        # в который записываем текущего пользователя из запроса.
+        serializer.save(owner=self.request.user)
+
     # Переопределяем метод create
     def create(self, request, *args, **kwargs):
         # Копируем данные из запроса, чтобы их можно было изменять
@@ -199,6 +206,20 @@ class BookListCreateView(ListCreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class UserBookListView(ListAPIView):
+    serializer_class = BookSerializer
+
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        """
+        Этот метод определяет набор данных.
+        Мы переопределяем его, чтобы вернуть книги,
+        отфильтрованные по текущему пользователю.
+        """
+        return Book.objects.filter(owner=self.request.user)  # Фильтруем книги по полю owner
 
 
 # # --- Представление для одного объекта (чтение, обновление, удаление) ---

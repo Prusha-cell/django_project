@@ -5,7 +5,7 @@ from .views import create_genre, BookListCreateView, BookDetailUpdateDeleteView,
     ExpensiveBooksView, GenreDetailUpdateDeleteView, GenreViewSet, \
     books_by_date_view, lazy_load_demo, create_book_and_publisher_view, \
     ProtectedDataView, PublicView, AdminView, \
-    ReadOnlyOrAuthenticatedView  # book_list_create, book_detail_update_delete,
+    ReadOnlyOrAuthenticatedView, UserBookListView  # book_list_create, book_detail_update_delete,
 
 router = DefaultRouter()
 
@@ -23,7 +23,7 @@ urlpatterns = [
     path('books/expensive/', ExpensiveBooksView.as_view(), name='book-expensive'),
     # path('genres/', create_genre, name='create-genre'), # Маршрут для создания жанра
     # path('genres/<str:name>/', GenreDetailUpdateDeleteView.as_view(), name='genre-detail-update-delete'),
-
+    path('user-books/', UserBookListView.as_view(), name='user-book-list'),
     path('', include(router.urls)),
     re_path(r'^books/(?P<year>\d{4})/(?P<month>\d{2})/(?P<day>\d{2})/$', books_by_date_view, name='books-by-date'),
     path('lazy_load/', lazy_load_demo, name='lazy-load-demo'),
