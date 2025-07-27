@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status, filters
@@ -22,6 +23,19 @@ from django.utils import timezone
 from django.http import JsonResponse
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
+
+
+class ReadOnlyOrAuthenticatedView(APIView):
+    # означает что доступ к созданию, обновлению имеет аутентифицированный пользователь,
+    # а не аутентифицированный пользователь только для чтения
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request):
+        return Response({"message": "This is readable by anyone, but modifiable only by authenticated users."})
+
+    def post(self, request):
+        # Этот метод будет доступен только аутентифицированным пользователям
+        return Response({"message": "Data created by authenticated user!"})
 
 
 # # создание новой задачи

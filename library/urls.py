@@ -4,7 +4,8 @@ from rest_framework.routers import DefaultRouter, SimpleRouter
 from .views import create_genre, BookListCreateView, BookDetailUpdateDeleteView, \
     ExpensiveBooksView, GenreDetailUpdateDeleteView, GenreViewSet, \
     books_by_date_view, lazy_load_demo, create_book_and_publisher_view, \
-    ProtectedDataView, PublicView  # book_list_create, book_detail_update_delete,
+    ProtectedDataView, PublicView, AdminView, \
+    ReadOnlyOrAuthenticatedView  # book_list_create, book_detail_update_delete,
 
 router = DefaultRouter()
 
@@ -29,4 +30,6 @@ urlpatterns = [
     path('books/transaction/', create_book_and_publisher_view, name='book-create-book-and-publisher'),
     path('protected/', ProtectedDataView.as_view(), name='protected-data'),
     path('public/', PublicView.as_view(), name='public-data'),
+    path('for-admin/', AdminView.as_view(), name='admin-data'),
+    path('read-anon/', ReadOnlyOrAuthenticatedView.as_view(), name='read-anon'),
 ]

@@ -5,18 +5,19 @@ from .views import (TaskListCreateView,
                     TaskDetailUpdateDeleteView,
                     SubTaskListCreateView,
                     SubTaskDetailUpdateDeleteView,
-                   # task_create,
-                   # task_list,
-                   # task_detail,
-                   display_statistic_tasks,
+                    ReadOnlyOrAuthenticatedView,
+    # task_create,
+    # task_list,
+    # task_detail,
+                    display_statistic_tasks,
                     CategoryViewSet)
-# from Task_Manager.views import SubTaskListCreateView, SubTaskDetailUpdateDeleteView
+
+# from Task_Manager.views import SubTaskListCreateView, SubTaskDetailUpdateDeleteView,
+# ReadOnlyOrAuthenticatedView
 
 router = DefaultRouter()
 
 router.register('categories', CategoryViewSet)
-
-
 
 urlpatterns = [
     # path('tasks/create/', task_create, name='task-create'),  # Маршрут для создания новой задачи
@@ -32,4 +33,5 @@ urlpatterns = [
     path('subtasks/', SubTaskListCreateView.as_view(), name='subtask-list-create'),
     path('subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view(), name='subtask-detail-update-delete'),
     path('', include(router.urls)),
+    path('read-anon', ReadOnlyOrAuthenticatedView.as_view(), name='read-anon')
 ]
