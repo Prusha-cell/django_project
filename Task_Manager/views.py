@@ -2,15 +2,16 @@ from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import api_view, action
 from rest_framework.exceptions import NotFound
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status, filters
 from rest_framework.viewsets import ModelViewSet
 
 from config.paginations import CustomCursorPagination
+from .permissions import IsOwnerOrReadOnly
 from .serializers import (TaskSerializer,
                           TaskCreateSerializer,
                           TaskListSerializer,
@@ -146,6 +147,7 @@ class TaskListCreateView(ListCreateAPIView):
 class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     # # Переопределяем стандартный метод получения объекта
     # def get_object(self):
@@ -167,6 +169,16 @@ class TaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
         # Добавляем в него наш флаг из параметров запроса
         context['include_related'] = self.request.query_params.get('include_related', 'false').lower() == 'true'
         return context
+
+
+# представление для получения задач, принадлежащих текущему пользователю
+class MyTasksListView(ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomCursorPagination
+
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
 
 
 # статистика задач
@@ -288,6 +300,18 @@ class SubTaskListCreateView(ListCreateAPIView):
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+
+# представление для получения подзадач, принадлежащих текущему пользователю
+class MySubTasksListView(ListAPIView):
+    serializer_class = SubTaskSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class = CustomCursorPagination
+
+    def get_queryset(self):
+        return SubTask.objects.filter(owner=self.request.user)
+
 
 
 ################### ModelViewSet for Category #####################################

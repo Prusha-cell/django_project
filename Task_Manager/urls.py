@@ -10,7 +10,7 @@ from .views import (TaskListCreateView,
     # task_list,
     # task_detail,
                     display_statistic_tasks,
-                    CategoryViewSet)
+                    CategoryViewSet, MyTasksListView, MySubTasksListView)
 
 # from Task_Manager.views import SubTaskListCreateView, SubTaskDetailUpdateDeleteView,
 # ReadOnlyOrAuthenticatedView
@@ -33,5 +33,7 @@ urlpatterns = [
     path('subtasks/', SubTaskListCreateView.as_view(), name='subtask-list-create'),
     path('subtasks/<int:pk>/', SubTaskDetailUpdateDeleteView.as_view(), name='subtask-detail-update-delete'),
     path('', include(router.urls)),
-    path('read-anon', ReadOnlyOrAuthenticatedView.as_view(), name='read-anon')
+    path('read-anon', ReadOnlyOrAuthenticatedView.as_view(), name='read-anon'),
+    path('my-tasks/', MyTasksListView.as_view(), name='my-tasks'),
+    path('my-subtasks/', MySubTasksListView.as_view(), name='my-subtasks'),
 ]
