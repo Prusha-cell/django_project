@@ -1,14 +1,16 @@
+from django.contrib.auth import authenticate
 from django.shortcuts import render
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import api_view, action
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.request import Request
 from rest_framework import status, filters
 from rest_framework.viewsets import ModelViewSet
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from config.paginations import CustomCursorPagination
 from .permissions import IsOwnerOrReadOnly
@@ -313,7 +315,6 @@ class MySubTasksListView(ListAPIView):
         return SubTask.objects.filter(owner=self.request.user)
 
 
-
 ################### ModelViewSet for Category #####################################
 
 class CategoryViewSet(ModelViewSet):
@@ -353,3 +354,45 @@ class RegisterView(APIView):
             )
 
         return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Вспомогательная функция для установки cookie
+def set_jwt_cookies(response, user):
+    refresh = RefreshToken.for_user(user)
+    access_token = refresh.access_token
+
+    response.set_cookie(
+        key='access_token',
+        value=str(access_token),
+        httponly=True, secure=False, samesite='Lax'
+    )
+    response.set_cookie(
+        key='refresh_token',
+        value=str(refresh),
+        httponly=True, secure=False, samesite='Lax'
+    )
+
+
+class LoginView(APIView):
+    # Разрешаем доступ всем (даже анонимным пользователям), чтобы они могли войти
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        # Проверяем, существует ли пользователь с таким логином и паролем
+        user = authenticate(request, username=username, password=password)
+
+        if user:
+            # Создаем успешный ответ
+            response = Response(status=status.HTTP_200_OK)
+
+            set_jwt_cookies(response, user)
+
+            return response
+
+        return Response(
+            {"detail": "Неверное имя пользователя или пароль."},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
