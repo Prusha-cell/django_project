@@ -265,3 +265,7 @@ SIMPLE_JWT = {
     # Указываем тип заголовка авторизации
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@example.com'
