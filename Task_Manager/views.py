@@ -396,3 +396,13 @@ class LoginView(APIView):
             {"detail": "Неверное имя пользователя или пароль."},
             status=status.HTTP_401_UNAUTHORIZED
         )
+
+
+class LogoutView(APIView):
+    def post(self, request, *args, **kwargs):
+        # Создаем пустой ответ
+        response = Response(data={'message': 'Logout successful'}, status=status.HTTP_204_NO_CONTENT)
+        # Отправляем команду браузеру на удаление cookie
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+        return response

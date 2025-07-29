@@ -10,7 +10,7 @@ from .views import (TaskListCreateView,
     # task_list,
     # task_detail,
                     display_statistic_tasks,
-                    CategoryViewSet, MyTasksListView, MySubTasksListView, RegisterView, LoginView)
+                    CategoryViewSet, MyTasksListView, MySubTasksListView, RegisterView, LoginView, LogoutView)
 
 # from Task_Manager.views import SubTaskListCreateView, SubTaskDetailUpdateDeleteView,
 # ReadOnlyOrAuthenticatedView
@@ -37,5 +37,6 @@ urlpatterns = [
     path('my-tasks/', MyTasksListView.as_view(), name='my-tasks'),
     path('my-subtasks/', MySubTasksListView.as_view(), name='my-subtasks'),
     path('registration/', RegisterView.as_view(), name='task_manager-registration'),
-    path('login/', LoginView.as_view(), name='task_manager-login')
+    path('login/', LoginView.as_view(), name='task_manager-login'),
+    path('logout/', LogoutView.as_view(), name='shop-logout'),
 ]
