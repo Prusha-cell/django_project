@@ -106,6 +106,7 @@ class LogoutView(APIView):
         response.delete_cookie('refresh_token')
         return response
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     """
     Это представление предоставляет полный набор действий (CRUD) для модели Category.
@@ -213,6 +214,10 @@ class OrderViewSet(viewsets.ModelViewSet):
         совпадает с текущим пользователем.
         Таким образом, каждый пользователь видит только свои заказы.
         """
+
+        # if getattr(self, 'swagger_fake_view', False):
+        #     return Order.objects.none()
+
         return Order.objects.filter(user=self.request.user)
 
     def get_serializer_class(self):

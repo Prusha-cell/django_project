@@ -23,7 +23,7 @@ router.register('order-item', OrderItemViewSet)
 # Основной список маршрутов нашего приложения.
 # Мы просто включаем в него все URL, которые сгенерировал роутер.
 urlpatterns = [
-    path('', include(router.urls)),
+    # path('', include(router.urls)),
     path('product/', ProductListCreateView.as_view(), name='product-list-create'),
     path('product/<int:pk>/', ProductRetrieveUpdateDestroyView.as_view(), name='product-retrieve-update-destroy'),
     path('order-statistics/', OrderStatisticsView.as_view(), name='order-statistics'),

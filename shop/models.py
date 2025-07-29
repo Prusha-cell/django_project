@@ -1,8 +1,11 @@
+from django.contrib.auth.models import User
+from django.db import models
 from itertools import product
 
-from django.db import models
+from config import settings
 
 
+# Create your models here.
 class Category(models.Model):
     name = models.CharField(max_length=40, unique=True)
 
@@ -25,11 +28,9 @@ class Supplier(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
-    # on_delete=models.PROTECT - значит, НЕЛЬЗЯ удалить категорию, если на нее уже подвязаны продукты.
     category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name='products')
     supplier = models.ForeignKey(Supplier, on_delete=models.PROTECT, related_name='products')
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    # Количество доступного продукта:
     quantity = models.PositiveIntegerField(default=0)
     article = models.CharField(max_length=100, unique=True, help_text="Unique string product id", db_index=True)
     available = models.BooleanField(default=True)
@@ -42,9 +43,7 @@ class Product(models.Model):
 
 
 class ProductDetail(models.Model):
-    # OneToOneField -- потому что для одного описания НЕ может быть несколько продуктов.
     product = models.OneToOneField(Product, on_delete=models.CASCADE, related_name='details')
-    # null=True -- для БД, blank=True -- для Админки:
     description = models.TextField(null=True, blank=True)
     manufacturing_date = models.DateField(null=True, blank=True)
     expiration_date = models.DateField(null=True, blank=True)
@@ -88,10 +87,21 @@ class Customer(models.Model):
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.PROTECT, related_name='orders')
     order_date = models.DateTimeField(auto_now_add=True, editable=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name='orders'
+    )
 
     class Meta:
         ordering = ['-order_date']
         get_latest_by = 'order_date'
+
+        # Добавляем кастомное разрешение
+        permissions = [
+            ("can_view_order_statistics", "Can view order statistics"),
+        ]
 
     def __str__(self):
         return f"Order {self.id} by {self.customer}"  # self.customer -- Здесь автоматически подхватит return f"{self.first_name} {self.last_name}"
