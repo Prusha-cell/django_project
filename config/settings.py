@@ -255,13 +255,13 @@ REST_FRAMEWORK = {
 
 SIMPLE_JWT = {
     # Время жизни access токена (короткое)
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=10),
     # Время жизни refresh токена (длинное)
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-    # # Включаем ротацию refresh токенов для повышения безопасности
-    # 'ROTATE_REFRESH_TOKENS': True,
-    # # Добавляем старый refresh токен в черный список после его использования
-    # 'BLACKLIST_AFTER_ROTATION': True,
-    # # Указываем тип заголовка авторизации
-    # 'AUTH_HEADER_TYPES': ('Bearer',),
+    # Включаем ротацию refresh токенов для повышения безопасности
+    'ROTATE_REFRESH_TOKENS': True,
+    # Добавляем старый refresh токен в черный список после его использования
+    'BLACKLIST_AFTER_ROTATION': True,
+    # Указываем тип заголовка авторизации
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }

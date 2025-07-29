@@ -7,7 +7,7 @@ from django.urls import resolve
 class JWTAuthenticationMiddleware(MiddlewareMixin):
     def process_request(self, request):
         # Пропускаем проверку для эндпоинтов, которые не требуют аутентификации
-        if request.path_info in ['/shop/login/', '/shop/register/', '/shop/logout/']:
+        if request.path_info in ['/shop/login/', '/shop/registration/', '/shop/logout/']:
             return
 
         access_token_cookie = request.COOKIES.get('access_token')

@@ -17,7 +17,7 @@ from .serializers import (TaskSerializer,
                           TaskListSerializer,
                           TaskDetailSerializer,
                           SubTaskSerializer,
-                          CategorySerializer)
+                          CategorySerializer, UserRegisterSerializer)
 from .models import Task, SubTask, Category
 from django.db.models import Count
 from django.utils import timezone
@@ -340,3 +340,16 @@ class CategoryViewSet(ModelViewSet):
             for category in categories_with_task_counts
         ]
         return Response(data)
+
+
+class RegisterView(APIView):
+    def post(self, request):
+        serializers = UserRegisterSerializer(data=request.data)
+        if serializers.is_valid():
+            serializers.save()
+            return Response(
+                {'message': 'User registered successfully.'},
+                status=status.HTTP_201_CREATED,
+            )
+
+        return Response(serializers.errors, status=status.HTTP_400_BAD_REQUEST)
